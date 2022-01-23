@@ -1,5 +1,5 @@
 {
-  "name": "bloxy",
+  "name": "@bloxyjs/legacy",
   "private": false,
   "version": "6.0.0-alpha",
   "engines": {
@@ -8,11 +8,11 @@
   "main": "./dist/index.js",
   "description": "A Node.JS library for interacting with the Roblox website and its API.",
   "bugs": {
-    "url": "https://github.com/visualizememe/bloxy/issues"
+    "url": "https://github.com/bloxyjs/legacy/issues"
   },
   "repository": {
     "directory": "https://github.com",
-    "url": "https://github.com/visualizememe/bloxy",
+    "url": "https://github.com/bloxyjs/legacy",
     "type": "github"
   },
   "homepage": "https://bloxy.js.org/",

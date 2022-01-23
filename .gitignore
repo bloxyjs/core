@@ -1,7 +1,7 @@
 node_modules
 coverage
 tests/index.js
-# dist # Should we really ignore the dist folder?
+dist
 docs
 site
 .idea

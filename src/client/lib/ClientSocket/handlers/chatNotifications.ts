@@ -1,6 +1,5 @@
 import * as ClientSocket from "../ClientSocket";
-import { PartialChatConversation } from "../../../../old_structures/Chat";
-import { PartialUser } from "../../../../old_structures/User";
+import { BaseUser, BaseChatConversation } from "../../../../structures";
 
 export default function handleChatNotifications(
   socket: ClientSocket.Socket,
@@ -12,78 +11,59 @@ export default function handleChatNotifications(
       socket.emit(
         message.IsTyping ? "chatUserTyping" : "chatUserTypingStopped",
         {
-          user: new PartialUser(
-            {
-              id: message.UserId
-            },
-            socket.client
-          ),
-          conversation: new PartialChatConversation(
-            {
-              id: message.ConversationId
-            },
-            socket.client
+          user: new BaseUser(socket.client, message.UserId),
+          conversation: new BaseChatConversation(
+            socket.client,
+            message.ConversationId
           )
         }
       );
       break;
     case "newmessage":
       socket.emit("chatMessage", {
-        conversation: new PartialChatConversation(
-          {
-            id: message.ConversationId
-          },
-          socket.client
+        conversation: new BaseChatConversation(
+          socket.client,
+          message.ConversationId
         )
       });
       break;
     case "newmessagebyself":
       socket.emit("chatMessageSent", {
-        conversation: new PartialChatConversation(
-          {
-            id: message.ConversationId
-          },
-          socket.client
+        conversation: new BaseChatConversation(
+          socket.client,
+          message.ConversationId
         )
       });
       break;
     case "newconversation":
       socket.emit("chatConversationAdded", {
-        conversation: new PartialChatConversation(
-          {
-            id: message.ConversationId
-          },
-          socket.client
+        conversation: new BaseChatConversation(
+          socket.client,
+          message.ConversationId
         )
       });
       break;
     case "conversationremoved":
       socket.emit("chatConversationRemoved", {
-        conversation: new PartialChatConversation(
-          {
-            id: message.ConversationId
-          },
-          socket.client
+        conversation: new BaseChatConversation(
+          socket.client,
+          message.ConversationId
         )
       });
       break;
     case "participantadded":
       socket.emit("chatMemberAdded", {
-        conversation: new PartialChatConversation(
-          {
-            id: message.ConversationId
-          },
-          socket.client
+        conversation: new BaseChatConversation(
+          socket.client,
+          message.ConversationId
         )
       });
       break;
     case "participantlefet":
       socket.emit("chatMemberLeft", {
-        conversation: new PartialChatConversation(
-          {
-            id: message.ConversationId
-          },
-          socket.client
+        conversation: new BaseChatConversation(
+          socket.client,
+          message.ConversationId
         )
       });
       break;

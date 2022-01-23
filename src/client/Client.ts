@@ -1,21 +1,23 @@
 import { ClientBase, ClientOptions } from "./ClientBase";
 import { initAPIs, APIs } from "./apis";
-import { ClientUser } from "../old_structures/ClientUser";
 import { RESTController } from "../controllers/rest";
-import { Group, PartialUser } from "../old_structures";
 import * as ClientSocket from "./lib/ClientSocket/ClientSocket";
 import { ChatManager } from "./lib/ChatManager/ChatManager";
 import { DataStoreManager } from "./lib/DataStoreManager/DataStoreManager";
-import { User } from "../structures/User";
-import { BaseUser } from "../structures/BaseUser";
+import { User } from "../structures";
+import { UserManager } from "./managers/UserManager";
+import { GroupManager } from "./managers/GroupManager";
 
 export class Client extends ClientBase {
-  public user: ClientUser | null;
+  public user: User | null;
   public apis: APIs;
   public rest: RESTController;
   public socket: ClientSocket.Socket;
   public dataStoreManager: DataStoreManager;
   public chat: ChatManager;
+
+  public users: UserManager;
+  public groups: GroupManager;
 
   constructor(options?: ClientOptions) {
     super(options);
@@ -27,6 +29,9 @@ export class Client extends ClientBase {
     this.dataStoreManager = new DataStoreManager(this);
     this.chat = new ChatManager(this);
 
+    this.users = new UserManager(this);
+    this.groups = new GroupManager(this);
+
     this.init();
   }
 
@@ -34,13 +39,13 @@ export class Client extends ClientBase {
     return this.user !== null;
   }
 
-  init(): void {
+  private init(): void {
     if (this.options.rest) {
       this.rest.setOptions(this.options.rest);
     }
   }
 
-  public async login(cookie?: string): Promise<ClientUser> {
+  public async login(cookie?: string): Promise<User> {
     this.log("info", {
       name: "Client.login",
       description: `Started login process..`
@@ -72,13 +77,10 @@ export class Client extends ClientBase {
 
     const getAuthenticationData =
       await this.apis.usersAPI.getAuthenticatedUserInformation();
-    this.user = new ClientUser(
-      {
-        id: getAuthenticationData.id,
-        name: getAuthenticationData.name
-      },
-      this
-    );
+    const userData = await this.apis.usersAPI.getUserById({
+      userId: getAuthenticationData.id
+    });
+    this.user = new User(this, userData);
     this.emit("loggedIn");
 
     this.log("info", {
@@ -87,95 +89,5 @@ export class Client extends ClientBase {
     });
 
     return this.user;
-  }
-
-  getGroup(groupId: number): Promise<Group> {
-    return this.apis.groupsAPI
-      .getGroup({
-        groupId
-      })
-      .then((data) => {
-        if (!data) {
-          throw new Error(`Group not found: ${groupId}`);
-        } else {
-          return new Group(data, this);
-        }
-      });
-  }
-
-  /**
-   * Returns a base user object from a user id.
-   * @param userId The user's ID
-   */
-  getBaseUser(userId: number): BaseUser {
-    return new BaseUser(this, userId);
-  }
-
-  /**
-   * Returns a user object from a user id.
-   * @param userId The user's ID
-   */
-  async getUser(userId: number): Promise<User> {
-    const data = await this.apis.usersAPI.getUserById({ userId });
-    return new User(this, data);
-  }
-
-  getUserIdFromUsername(username: string): Promise<PartialUser> {
-    return this.apis.usersAPI
-      .getUsersByUsernames({
-        usernames: [username],
-        excludeBannedUsers: false
-      })
-      .then((response) => {
-        if (response.data && response.data[0]) {
-          return new PartialUser(response.data[0], this);
-        } else {
-          throw new Error("Got invalid response from getUserIdFromUsername");
-        }
-      });
-  }
-
-  getUsernameFromUserId(userId: number | string): Promise<PartialUser> {
-    if (typeof userId === "string") {
-      userId = parseInt(userId);
-    }
-
-    return this.apis.generalApi
-      .getUserById({
-        userId
-      })
-      .then((data) => new PartialUser(data, this));
-  }
-
-  getUsersByUserIds(
-    userIds: number[] | string[],
-    excludeBannedUsers = false
-  ): Promise<PartialUser[]> {
-    if (typeof userIds[0] === "string") {
-      userIds = (userIds as string[]).map((userId) => parseInt(userId));
-    }
-
-    return this.apis.usersAPI
-      .getUsersByIds({
-        excludeBannedUsers,
-        userIds: userIds as number[]
-      })
-      .then((response) =>
-        response.data.map((userData) => new PartialUser(userData, this))
-      );
-  }
-
-  getUsersByUsernames(
-    usernames: string[],
-    excludeBannedUsers = false
-  ): Promise<PartialUser[]> {
-    return this.apis.usersAPI
-      .getUsersByUsernames({
-        excludeBannedUsers,
-        usernames
-      })
-      .then((response) =>
-        response.data.map((userData) => new PartialUser(userData, this))
-      );
   }
 }

@@ -1,12 +1,9 @@
-import { Client, UsersGetUserById } from "..";
-import { BaseUser } from "./BaseUser";
+import { Client, UsersGetUserById } from "../..";
+import { BaseGroup, BaseGroupMember } from "..";
 
-type UserConstructorData = UsersGetUserById;
+type GroupMemberConstructorData = UsersGetUserById;
 
-/**
- * Represents a roblox user
- */
-export class User extends BaseUser {
+export class GroupMember extends BaseGroupMember {
   readonly name: string;
   readonly displayName: string;
   readonly externalAppDisplayName: string;
@@ -18,8 +15,12 @@ export class User extends BaseUser {
    * @param {Client} client The Bloxy Client
    * @param {number} userId The user ID
    */
-  constructor(client: Client, data: UserConstructorData) {
-    super(client, data.id);
+  constructor(
+    client: Client,
+    group: BaseGroup,
+    data: GroupMemberConstructorData
+  ) {
+    super(client, group, data.id);
     this.name = data.name;
     this.displayName = data.displayName;
     this.externalAppDisplayName = data.externalAppDisplayName;

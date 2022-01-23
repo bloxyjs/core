@@ -1,5 +1,5 @@
 import { Socket as ClientSocket } from "../ClientSocket";
-import { PartialUser } from "../../../../old_structures/User";
+import { BaseUser } from "../../../../structures";
 
 export default function handlePresenceBulkNotifications(
   socket: ClientSocket,
@@ -13,12 +13,7 @@ export default function handlePresenceBulkNotifications(
   message.forEach((presenceUpdated) => {
     socket.emit(
       "userPresenceChanged",
-      new PartialUser(
-        {
-          id: presenceUpdated.UserId
-        },
-        socket.client
-      )
+      new BaseUser(socket.client, presenceUpdated.UserId)
     );
   });
 }

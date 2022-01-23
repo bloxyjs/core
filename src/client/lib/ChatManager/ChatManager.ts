@@ -7,19 +7,17 @@ import {
   ChatRemoveUserFromConversation,
   ChatRenameGroupConversation,
   ChatResetConversationUniverse,
-  ChatSendGameLinkMessageOptions,
+  ChatGetConversationMessages,
   ChatSendMessageOptions,
   ChatSetConversationUniverse,
   ChatStartCloudEditConversation,
   ChatStartGroupConversation,
   ChatStartOneToOneConversation,
-  ChatUpdateUserTypingStatus
+  ChatUpdateUserTypingStatus,
+  ChatMessageSentData
 } from "../../apis/ChatAPI";
-import {
-  ChatConversation,
-  ChatMessage,
-  ChatMessageSent
-} from "../../../old_structures/Chat";
+import { ChatConversation } from "../../../structures";
+import { ChatMessage } from "../../../interfaces/ChatInterfaces";
 
 export class ChatManager {
   public client: Client;
@@ -42,16 +40,14 @@ export class ChatManager {
     conversationId: number,
     amount = 100,
     startMessageId?: string
-  ): Promise<ChatMessage[]> {
+  ): Promise<ChatGetConversationMessages> {
     return this.client.apis.chatAPI
       .getConversationMessages({
         conversationId,
         pageSize: amount,
         exclusiveStartMessageId: startMessageId
       })
-      .then((response) =>
-        response.map((chatData) => new ChatMessage(chatData, this.client))
-      );
+      .then((response) => response);
   }
 
   getUnreadConversationsCount(): Promise<number> {
@@ -68,7 +64,7 @@ export class ChatManager {
       .then((response) =>
         response.map(
           (conversationData) =>
-            new ChatConversation(conversationData, this.client)
+            new ChatConversation(this.client, conversationData)
         )
       );
   }
@@ -121,10 +117,7 @@ export class ChatManager {
     });
   }
 
-  getUnreadMessagesInConversations(
-    conversations: number[],
-    amount = 100
-  ): Promise<ChatMessage[]> {
+  getUnreadMessagesInConversations(conversations: number[], amount = 100) {
     return this.client.apis.chatAPI
       .getUnreadMessagesInConversations({
         conversationIds: conversations,
@@ -134,9 +127,7 @@ export class ChatManager {
         Array.prototype.concat.apply(
           [],
           response.map((conversationData) =>
-            conversationData.chatMessages.map(
-              (chatData) => new ChatMessage(chatData, this.client)
-            )
+            conversationData.chatMessages.map((chatData) => chatData)
           )
         )
       );
@@ -155,9 +146,7 @@ export class ChatManager {
         Array.prototype.concat.apply(
           [],
           response.map((conversationData) =>
-            conversationData.chatMessages.map(
-              (chatData) => new ChatMessage(chatData, this.client)
-            )
+            conversationData.chatMessages.map((chatData) => chatData)
           )
         )
       );
@@ -171,18 +160,10 @@ export class ChatManager {
     });
   }
 
-  sendGameLinkMessage(
-    options: ChatSendGameLinkMessageOptions
-  ): Promise<ChatMessageSent> {
-    return this.client.apis.chatAPI
-      .sendGameLinkMessage(options)
-      .then((response) => new ChatMessageSent(response, this.client));
-  }
-
-  sendMessage(options: ChatSendMessageOptions): Promise<ChatMessageSent> {
+  sendMessage(options: ChatSendMessageOptions): Promise<ChatMessageSentData> {
     return this.client.apis.chatAPI
       .sendMessage(options)
-      .then((response) => new ChatMessageSent(response, this.client));
+      .then((response) => response);
   }
 
   setConversationUniverse(

@@ -4,11 +4,7 @@ import {
   GeneralGetUserFriendsCount,
   GeneralGetUserFriendsCountOptions
 } from "./GeneralAPI";
-import { PartialUser } from "../../old_structures/User";
-import {
-  EnumUserPresence,
-  UserPresence
-} from "../../interfaces/GeneralInterfaces";
+import { UserPresence } from "../../interfaces/GeneralInterfaces";
 
 export type FriendsFindFriendByCodeOptions = {
   code: string;
@@ -170,11 +166,15 @@ export type FriendsUnfriendUserOptions = {
   userId: number;
 };
 export type FriendsUnfriendUser = unknown;
+export type FriendsGetSelfRecommendedUser = {
+  userId: number;
+  userName: string;
+  userProfilePageUrl: string;
+  userPresenceType: string;
+};
 export type FriendsGetSelfRecommendedUsers = {
-  user: PartialUser;
-  profileUrl: string;
-  presenceType: EnumUserPresence;
-}[];
+  recommendedUsers: FriendsGetSelfRecommendedUser[];
+};
 
 export class FriendsAPI extends BaseAPI {
   constructor(client: Client) {

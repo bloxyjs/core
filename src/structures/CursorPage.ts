@@ -92,6 +92,10 @@ export class CursorPage<T, C> {
 
     return result.data;
   }
+
+  getCurrentPage(): T[] {
+    return this.data[this.currentPage];
+  }
 }
 
 export function contextCall<T, C>(

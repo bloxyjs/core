@@ -1,7 +1,7 @@
-import { ClientUser } from "../old_structures/ClientUser";
+import { User } from "../structures";
 
 export declare type AnyIdentifier = string | number;
-export declare type UserIdentifier = ClientUser | AnyIdentifier;
+export declare type UserIdentifier = User | AnyIdentifier;
 export enum EnumUserPresence {
   "Offline",
   "Online",

@@ -1,5 +1,5 @@
 import * as ClientSocket from "../ClientSocket";
-import { PartialUser } from "../../../../old_structures/User";
+import { BaseUser } from "../../../../structures";
 
 export default function handleFriendshipNotifications(
   socket: ClientSocket.Socket,
@@ -9,34 +9,22 @@ export default function handleFriendshipNotifications(
   switch (messageType) {
     case "friendshipdestroyed":
       socket.emit("friendLost", {
-        user: new PartialUser(
-          {
-            id: [message.UserId1, message.UserId2].filter(
-              (id) => id !== socket.client.user!.id
-            )[0]!
-          },
-          socket.client
+        user: new BaseUser(
+          socket.client,
+          [message.UserId1, message.UserId2].filter(
+            (id) => id !== socket.client.user!.id
+          )[0]!
         )
       });
       break;
     case "friendshiprequested":
       socket.emit("friendRequest", {
-        user: new PartialUser(
-          {
-            id: message.UserId1
-          },
-          socket.client
-        )
+        user: new BaseUser(socket.client, message.UserId1)
       });
       break;
     case "friendshipcreated":
       socket.emit("friendAdded", {
-        user: new PartialUser(
-          {
-            id: message.UserId1
-          },
-          socket.client
-        )
+        user: new BaseUser(socket.client, message.UserId1)
       });
       break;
     default:

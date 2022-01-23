@@ -12,8 +12,8 @@ import {
   PresenceGetUsersPresence,
   PrivateMessagesSendMessage,
   UsersUserNameHistory
-} from "..";
-import { contextCall, CursorPage } from "./CursorPage";
+} from "../..";
+import { contextCall, CursorPage } from "..";
 
 export type BaseUserOwnedBadge = {
   badgeId: number;
@@ -32,24 +32,16 @@ export type BaseUserGroupRole = {
  * Represents a Roblox user ID and gives direct access to various user-related APIs.
  */
 export class BaseUser {
-  #client: Client;
-  #userId: number;
+  readonly client: Client;
+  readonly id: number;
 
   /**
    * @param {Client} client The Bloxy Client
    * @param {number} userId The user ID
    */
   constructor(client: Client, userId: number) {
-    this.#client = client;
-    this.#userId = userId;
-  }
-
-  get client() {
-    return this.#client;
-  }
-
-  get userId() {
-    return this.#userId;
+    this.client = client;
+    this.id = userId;
   }
 
   /**
@@ -65,13 +57,13 @@ export class BaseUser {
   ): Promise<CursorPage<UsersUserNameHistory["data"][0], { userId: number }>> {
     return this.client.apis.usersAPI
       .getUserNameHistory({
-        userId: this.userId
+        userId: this.id
       })
       .then(
         (response) =>
           new CursorPage(
             { limit, sortOrder, cursor },
-            { userId: this.userId },
+            { userId: this.id },
             response,
             contextCall(
               this.client.apis.usersAPI,
@@ -87,7 +79,7 @@ export class BaseUser {
   getPresence(): Promise<PresenceGetUsersPresence> {
     return this.client.apis.presenceAPI
       .getUsersPresences({
-        userIds: [this.userId]
+        userIds: [this.id]
       })
       .then((presence) => presence.userPresences[0]);
   }
@@ -101,7 +93,7 @@ export class BaseUser {
     userSort?: FriendsGetUserFriendsOptions["userSort"]
   ): Promise<FriendsGetUserFriends> {
     return this.client.apis.friendsAPI.getUserFriends({
-      userId: this.userId,
+      userId: this.id,
       userSort
     });
   }
@@ -110,12 +102,12 @@ export class BaseUser {
    * Returns the user's robux amount. The BaseUser must be the currently authenticated user, or else this function throws an error.
    */
   getCurrency(): Promise<EconomyGetSelfCurrency> {
-    if (this.client.user?.id !== this.userId) {
+    if (this.client.user?.id !== this.id) {
       throw new Error(
         "This function can only be called with the currently authenticated user"
       );
     }
-    return this.client.apis.economyAPI.getSelfCurrency({ userId: this.userId });
+    return this.client.apis.economyAPI.getSelfCurrency({ userId: this.id });
   }
 
   /**
@@ -123,7 +115,7 @@ export class BaseUser {
    */
   hasPremium(): Promise<boolean> {
     return this.client.apis.premiumFeaturesAPI.validateUserMembership({
-      userId: this.userId
+      userId: this.id
     });
   }
 
@@ -135,7 +127,7 @@ export class BaseUser {
   ownsItem(itemType: ItemType, itemId: number): Promise<boolean> {
     return this.client.apis.inventoryAPI
       .getUserItemsByTypeAndTargetId({
-        userId: this.userId,
+        userId: this.id,
         itemType,
         itemTargetId: itemId
       })
@@ -165,7 +157,7 @@ export class BaseUser {
   getBadgeAwardedDates(badgeIds: number[]): Promise<BaseUserOwnedBadge[]> {
     return this.client.apis.badgesAPI
       .getUserBadgesAwardedDates({
-        userId: this.userId,
+        userId: this.id,
         badgeIds
       })
       .then((response) =>
@@ -183,7 +175,7 @@ export class BaseUser {
   getGroupRoles(): Promise<BaseUserGroupRole[]> {
     return this.client.apis.groupsAPI
       .getUserGroups({
-        userId: this.userId
+        userId: this.id
       })
       .then((response) =>
         response.data.map((groupMembership) => ({
@@ -200,7 +192,7 @@ export class BaseUser {
    */
   getRobloxBadges(): Promise<AccountInformationRobloxBadges> {
     return this.client.apis.accountInformationAPI.getRobloxBadges({
-      userId: this.userId
+      userId: this.id
     });
   }
 
@@ -209,7 +201,7 @@ export class BaseUser {
    */
   getPromotionChannels(): Promise<AccountInformationPromotionChannels> {
     return this.client.apis.accountInformationAPI.getUserPromotionChannels({
-      userId: this.userId
+      userId: this.id
     });
   }
 
@@ -219,7 +211,7 @@ export class BaseUser {
   getFriendCount(): Promise<number> {
     return this.client.apis.friendsAPI
       .getUserFriendsCount({
-        userId: this.userId
+        userId: this.id
       })
       .then((response) => response.count);
   }
@@ -230,7 +222,7 @@ export class BaseUser {
   getFollowerCount(): Promise<number> {
     return this.client.apis.friendsAPI
       .getUserFollowersCount({
-        userId: this.userId
+        userId: this.id
       })
       .then((response) => response.count);
   }
@@ -241,7 +233,7 @@ export class BaseUser {
   getFollowingCount(): Promise<number> {
     return this.client.apis.friendsAPI
       .getUserFollowingCount({
-        userId: this.userId
+        userId: this.id
       })
       .then((response) => response.count);
   }
@@ -261,7 +253,7 @@ export class BaseUser {
   > {
     return this.client.apis.friendsAPI
       .getUserFollowers({
-        userId: this.userId,
+        userId: this.id,
         limit,
         sortOrder,
         cursor
@@ -270,7 +262,7 @@ export class BaseUser {
         (response) =>
           new CursorPage(
             { limit, sortOrder, cursor },
-            { userId: this.userId },
+            { userId: this.id },
             response,
             contextCall(
               this.client.apis.friendsAPI,
@@ -295,7 +287,7 @@ export class BaseUser {
   > {
     return this.client.apis.friendsAPI
       .getUserFollowing({
-        userId: this.userId,
+        userId: this.id,
         limit,
         sortOrder,
         cursor
@@ -304,7 +296,7 @@ export class BaseUser {
         (response) =>
           new CursorPage(
             { limit, sortOrder, cursor },
-            { userId: this.userId },
+            { userId: this.id },
             response,
             contextCall(
               this.client.apis.friendsAPI,
@@ -326,7 +318,7 @@ export class BaseUser {
     body: string
   ): Promise<PrivateMessagesSendMessage> {
     return this.client.apis.privateMessagesAPI.sendMessage({
-      userId: this.userId,
+      userId: this.id,
       recipientId,
       subject,
       body

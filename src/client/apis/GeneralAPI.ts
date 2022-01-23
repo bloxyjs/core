@@ -1,9 +1,5 @@
 import { BaseAPI } from "./BaseAPI";
 import { Client } from "../Client";
-import {
-  AssetVersionOptions,
-  ProductOptions
-} from "../../old_structures/Asset";
 
 export declare type GeneralGetAssetVersionOptions = number;
 export declare type GeneralAwardBadgeOptions = {
@@ -80,7 +76,16 @@ export declare type GeneralUserCanManageAssetOptions = {
 export declare type GeneralGetUserByIdOptions = {
   userId: number;
 };
-export declare type GeneralGetAssetVersions = AssetVersionOptions[];
+export declare type GeneralGetAssetVersions = {
+  Id: number;
+  AssetId: number;
+  VersionNumber: number;
+  ParentAssetVersionId: number;
+  CreatorType: unknown;
+  CreatingUniverseId: number | null;
+  Created: string;
+  Updated: string;
+}[];
 export declare type GeneralAwardBadge = boolean;
 export declare type GeneralGetBalance = {
   robux: number;
@@ -137,6 +142,32 @@ export declare type GeneralGetIncomingItems = {
   unreadMessageCount: number;
   friendRequestsCount: number;
 };
+interface ProductOptions {
+  TargetId: number;
+  ProductType: string;
+  AssetId: number;
+  ProductId: number;
+  Name: string;
+  Description: string;
+  AssetTypeId: number;
+  Creator: {
+    Id: number;
+    Name: string;
+  };
+  IconImageAssetId: number;
+  Created: string;
+  Updated: string;
+  PriceInRobux: number;
+  PriceInTickets: null;
+  Sales: number;
+  IsNew: boolean;
+  IsForSale: boolean;
+  IsPublicDomain: boolean;
+  IsLimited: boolean;
+  IsLimitedUnique: boolean;
+  Remaining: number | null;
+  MinimumMembershipLevel: number;
+}
 export declare type GeneralGetProductInfo = ProductOptions;
 export declare type GeneralGetGamePassProductInfo = ProductOptions;
 export declare type GeneralUserOwnsAsset = boolean;

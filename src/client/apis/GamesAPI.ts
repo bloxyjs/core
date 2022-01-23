@@ -1,11 +1,29 @@
 import { BaseAPI } from "./BaseAPI";
 import { Client } from "../Client";
-import {
-  GameUniverseOptions,
-  PartialGameUniverse,
-  PlaceOptions,
-  VIPServerOptions
-} from "../../old_structures/Game";
+
+interface GameUniverseOptions {
+  id: number;
+  rootPlaceId: number;
+  name: string;
+  description: string;
+  creatorType: string;
+  creator: {
+    id: number;
+    name: string;
+  };
+  price: number;
+  allowedGearGenres: string[];
+  allowedGearCategories: string[];
+  playing: number;
+  visits: number;
+  maxPlayers: number;
+  created: string;
+  updated: string;
+  studioAccessToApisAllowed: boolean;
+  createVipServersAllowed: boolean;
+  universeAvatarType: string;
+  genre: string;
+}
 
 export type GamesGameServer = {
   id: string;
@@ -99,7 +117,10 @@ export type GamesListGames = {
 export type GamesMultiGetPlacesOptions = {
   placeIds: number[];
 };
-export type GamesMultiGetPlaces = PlaceOptions[];
+export type GamesMultiGetPlaces = {
+  id: number;
+  name?: string;
+}[];
 export type GamesMultiGetGameUniversesPlayabilityOptions = {
   universeIds: number[];
 };
@@ -211,7 +232,7 @@ export type GamesGetGamesVotesOptions = {
 };
 export type GamesGetGamesVotes = {
   data: {
-    number: PartialGameUniverse;
+    number: number;
     upVotes: number;
     downVotes: number;
   }[];
@@ -229,6 +250,36 @@ export type GamesCanSelfInviteUserToVIPServer = {
 };
 export type GamesGetVIPServerOptions = {
   id: number;
+};
+type VIPServerOptions = {
+  id: number;
+  name: string;
+  game: {
+    id: number;
+    name: string;
+    rootPlace: {
+      id: number;
+      name: string;
+    };
+  };
+  joinCode: string;
+  active: boolean;
+  subscription: {
+    active: boolean;
+    expired: boolean;
+    expirationDate: string;
+    price: number;
+  };
+  permissions: {
+    clanAllowed: boolean;
+    enemyClanId: number;
+    friendsAllowed: boolean;
+    users: {
+      id: number;
+      name: string;
+      displayName: string;
+    }[];
+  };
 };
 export type GamesGetVIPServer = VIPServerOptions;
 export type GamesUpdateVIPServerOptions = {

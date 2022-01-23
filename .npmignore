@@ -1,6 +1,18 @@
-node_modules
-coverage
-tests/index.js
+# New
+.vscode
+src
+tests
+.codecov.yml
+.eslintignore
+.eslintrc.json
+.gitignore
+.prettierrc
+mkdocs.yml
+sider.yml
+typedoc.json
 docs
-site
-.idea
+coverage
+node_modules
+
+.circleci
+CHANGELOG.md

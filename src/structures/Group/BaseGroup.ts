@@ -8,12 +8,57 @@ import {
 } from "../..";
 import { BaseGroupMember, GroupMember, CursorPage, contextCall } from "..";
 
+class MemberManager {
+  readonly client: Client;
+  readonly group: BaseGroup;
+
+  constructor(client: Client, group: BaseGroup) {
+    this.client = client;
+    this.group = group;
+  }
+
+  /**
+   * Returns a base group member object from a user id.
+   * @param userId The user's ID
+   */
+  get(userId: number): BaseGroupMember {
+    return new BaseGroupMember(this.client, this.group, userId);
+  }
+
+  /**
+   * Returns a group member object from a user id.
+   * @param userId The user's ID
+   */
+  async fetch(userId: number): Promise<GroupMember> {
+    const userData = await this.client.apis.usersAPI.getUserById({ userId });
+    const userGroups = await this.client.apis.groupsAPI.getUserGroups({
+      userId
+    });
+    const groupData = userGroups.data.find(
+      (group) => group.group.id === this.group.id
+    )?.role || {
+      id: -1,
+      name: "Guest",
+      description: "Non-group member",
+      memberCount: -1,
+      rank: 0
+    };
+    return new GroupMember(this.client, this.group, {
+      ...userData,
+      rankId: groupData.id,
+      rankName: groupData.name,
+      rank: groupData.rank
+    });
+  }
+}
+
 /**
  * Represents a Roblox group ID and gives direct access to various group-related APIs.
  */
 export class BaseGroup {
   readonly client: Client;
-  readonly groupId: number;
+  readonly id: number;
+  readonly members: MemberManager;
 
   /**
    * @param {Client} client The Bloxy Client
@@ -21,7 +66,8 @@ export class BaseGroup {
    */
   constructor(client: Client, groupId: number) {
     this.client = client;
-    this.groupId = groupId;
+    this.id = groupId;
+    this.members = new MemberManager(client, this);
   }
 
   /**
@@ -30,7 +76,7 @@ export class BaseGroup {
    */
   acceptUser(user: number): Promise<unknown> {
     return this.client.apis.groupsAPI.acceptJoinRequest({
-      groupId: this.groupId,
+      groupId: this.id,
       userId: user
     });
   }
@@ -41,26 +87,9 @@ export class BaseGroup {
    */
   declineUser(user: number): Promise<unknown> {
     return this.client.apis.groupsAPI.declineJoinRequest({
-      groupId: this.groupId,
+      groupId: this.id,
       userId: user
     });
-  }
-
-  /**
-   * Returns a base group member object
-   * @param user The user id
-   */
-  getBaseMember(user: number): BaseGroupMember {
-    return new BaseGroupMember(this.client, this, user);
-  }
-
-  /**
-   * Returns a group member object
-   * @param user The user id
-   */
-  async getMember(user: number): Promise<GroupMember> {
-    const data = await this.client.apis.usersAPI.getUserById({ userId: user });
-    return new GroupMember(this.client, this, data);
   }
 
   /**
@@ -76,7 +105,7 @@ export class BaseGroup {
   > {
     return this.client.apis.groupsAPI
       .getMembers({
-        groupId: this.groupId,
+        groupId: this.id,
         limit: limit,
         sortOrder: sortOrder
       })
@@ -84,7 +113,7 @@ export class BaseGroup {
         (response) =>
           new CursorPage(
             { limit, sortOrder },
-            { groupId: this.groupId },
+            { groupId: this.id },
             response,
             contextCall(
               this.client.apis.groupsAPI,
@@ -132,7 +161,7 @@ export class BaseGroup {
   > {
     return this.client.apis.groupsAPI
       .getMembersWithRole({
-        groupId: this.groupId,
+        groupId: this.id,
         roleId: roleId,
         limit: limit,
         sortOrder: sortOrder
@@ -141,7 +170,7 @@ export class BaseGroup {
         (response) =>
           new CursorPage(
             { limit, sortOrder },
-            { groupId: this.groupId, roleId: roleId },
+            { groupId: this.id, roleId: roleId },
             response,
             contextCall(
               this.client.apis.groupsAPI,
@@ -157,7 +186,7 @@ export class BaseGroup {
   getRoles(): Promise<GroupsGetGroupRoles["roles"]> {
     return this.client.apis.groupsAPI
       .getGroupRoles({
-        groupId: this.groupId
+        groupId: this.id
       })
       .then((response) => response.roles);
   }
@@ -170,7 +199,7 @@ export class BaseGroup {
     const roles = await this.getRoles();
     const foundRole = roles.find((role) => role.rank === rank);
     if (!foundRole) {
-      throw new Error(`Group ${this.groupId} has no role with rank ${rank}`);
+      throw new Error(`Group ${this.id} has no role with rank ${rank}`);
     }
     return foundRole.id;
   }
@@ -186,7 +215,7 @@ export class BaseGroup {
   ): Promise<CursorPage<GroupsGetWallPosts["data"][0], { groupId: number }>> {
     return this.client.apis.groupsAPI
       .getWallPosts({
-        groupId: this.groupId,
+        groupId: this.id,
         limit: limit,
         sortOrder: sortOrder
       })
@@ -194,7 +223,7 @@ export class BaseGroup {
         (response) =>
           new CursorPage(
             { limit, sortOrder },
-            { groupId: this.groupId },
+            { groupId: this.id },
             response,
             contextCall(
               this.client.apis.groupsAPI,
@@ -210,7 +239,7 @@ export class BaseGroup {
    */
   kickMember(user: number): Promise<unknown> {
     return this.client.apis.groupsAPI.kickMember({
-      groupId: this.groupId,
+      groupId: this.id,
       userId: user
     });
   }
@@ -236,7 +265,7 @@ export class BaseGroup {
    */
   setRole(user: number, roleId: number) {
     return this.client.apis.groupsAPI.updateMember({
-      groupId: this.groupId,
+      groupId: this.id,
       userId: user,
       roleId: roleId
     });
@@ -248,7 +277,7 @@ export class BaseGroup {
    */
   setShout(message: string) {
     return this.client.apis.groupsAPI.updateGroupStatus({
-      groupId: this.groupId,
+      groupId: this.id,
       message: message
     });
   }

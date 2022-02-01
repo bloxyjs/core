@@ -1,7 +1,16 @@
-import { Client, UsersGetUserById } from "../..";
+import { Client, GroupsGetUserGroups, UsersGetUserById } from "../..";
 import { BaseGroup, BaseGroupMember } from "..";
 
-type GroupMemberConstructorData = UsersGetUserById;
+type RankDataOption = Omit<
+  GroupsGetUserGroups["data"][0]["role"],
+  "memberCount" | "description" | "id" | "name"
+> & { rankId: number; rankName: string };
+type RankData = Omit<
+  GroupsGetUserGroups["data"][0]["role"],
+  "memberCount" | "description"
+>;
+
+type GroupMemberConstructorData = UsersGetUserById & RankDataOption;
 
 export class GroupMember extends BaseGroupMember {
   readonly name: string;
@@ -10,6 +19,8 @@ export class GroupMember extends BaseGroupMember {
   readonly isBanned: boolean;
   readonly description: string;
   readonly created: Date;
+  readonly group: BaseGroup;
+  readonly rank: RankData;
 
   /**
    * @param {Client} client The Bloxy Client
@@ -27,5 +38,11 @@ export class GroupMember extends BaseGroupMember {
     this.isBanned = data.isBanned;
     this.description = data.description;
     this.created = new Date(data.created);
+    this.group = group;
+    this.rank = {
+      id: data.rankId,
+      rank: data.rank,
+      name: data.rankName
+    };
   }
 }

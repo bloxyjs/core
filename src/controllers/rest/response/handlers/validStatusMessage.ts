@@ -15,11 +15,11 @@ export function validStatusMessage(response: RESTResponse): boolean | Error {
       responseOptions.disallowedStatusMessages || [];
 
     const isAllowed = allowedStatusMessages.some((statusMessage: string) =>
-      responseData.statusMessage.toLowerCase().includes(statusMessage)
+      responseData.statusMessage.toLowerCase().includes(statusMessage.toLowerCase())
     );
     const isDisallowed = disallowedStatusMessages.some(
       (statusMessage: string) =>
-        responseData.statusMessage.toLowerCase().includes(statusMessage)
+        responseData.statusMessage.toLowerCase().includes(statusMessage.toLowerCase())
     );
 
     if (allowedStatusMessages.length > 0) {
